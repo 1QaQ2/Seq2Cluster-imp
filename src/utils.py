@@ -4,7 +4,6 @@ import copy
 
 import pwlf
 import numpy as np
-import tensorflow as tf 
 from tqdm import tqdm
 from sklearn.metrics import roc_auc_score, roc_curve, f1_score, precision_score, recall_score
 from sklearn.preprocessing import MinMaxScaler
@@ -142,19 +141,3 @@ def make_batch(inputs, max_sequence_length = None, normalize = False):
     
     return inputs_time_major, sequence_lengths
 
-def reconstruction_distances(input_tensor, reconstruction):
-    with tf.variable_scope('reconstruction_distances'):
-        squared_x = tf.reduce_sum(tf.square(input_tensor),
-                                  name='squared_x',
-                                  axis=1) + 1e-12
-        # Relative distance
-        input_tensor = input_tensor[:,:,0]
-        reconstruction = reconstruction[:,:,0]
-        dist = tf.norm(input_tensor - reconstruction, ord=2, axis=1, keepdims=True, name='dist')
-        relative_dist = dist / tf.norm(input_tensor, ord=2, axis=1, keepdims=True, name='relative_dist')                                  
-                                          
-        # Cosine similarity
-        n1 = tf.nn.l2_normalize(input_tensor,1)
-        n2 = tf.nn.l2_normalize(reconstruction,1)
-        cosine_similarity = tf.reduce_sum(tf.multiply(n1, n2), 1, keepdims=True, name='cosine_similarity')
-        return squared_x, relative_dist, cosine_similarity, dist
